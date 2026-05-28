@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import Burger3D from "./components/Burger3D";
 import "./index.css";
 
 const products = [
@@ -166,11 +165,7 @@ function Home({ addToCart }) {
                 {item.popular && <span className="badge">Popular</span>}
 
                 <div className="itemImageBox">
-                  {item.name === "Cheese Burger" ? (
-                    <Burger3D />
-                  ) : (
-                    <div className="emojiImg">{item.image}</div>
-                  )}
+                  <div className="emojiImg">{item.image}</div>
                 </div>
 
                 <div className="productMeta">
