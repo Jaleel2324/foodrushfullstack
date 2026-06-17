@@ -1,101 +1,21 @@
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
-const dotenv = require("dotenv");
+require("dotenv").config();
 
-dotenv.config();
+const app = require("./src/app");
+const connectDB = require("./src/config/db");
 
-const app = express();
+const PORT = process.env.PORT || 5000;
 
-app.use(cors());
-app.use(express.json());
-
-// MongoDB connection
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => console.log("MongoDB connected"))
-  .catch((err) => console.log(err));
-
-// Order schema
-const orderSchema = new mongoose.Schema({
-  items: Array,
-  total: Number,
-  customer: Object,
-  status: {
-    type: String,
-    default: "Preparing",
-  },
-  createdAt: {
-    type: Date,
-    default: Date.now,
-  },
-});
-
-const Order = mongoose.model("Order", orderSchema);
-
-// TEST ROUTE
-app.get("/", (req, res) => {
-  res.send("API running");
-});
-
-// GET ORDERS
-app.get("/orders", async (req, res) => {
+async function startServer() {
   try {
-    const orders = await Order.find().sort({ createdAt: -1 });
+    await connectDB();
 
-    res.json({
-      success: true,
-      orders,
+    app.listen(PORT, () => {
+      console.log(`Server running on port ${PORT}`);
     });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message,
-    });
+  } catch (error) {
+    console.error("Failed to start server:", error.message);
+    process.exit(1);
   }
-});
+}
 
-// CREATE ORDER
-app.post("/orders", async (req, res) => {
-  try {
-    const order = await Order.create({
-      ...req.body,
-      status: "Preparing",
-    });
-
-    res.json({
-      success: true,
-      order,
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message,
-    });
-  }
-});
-
-// UPDATE STATUS
-app.patch("/orders/:id", async (req, res) => {
-  try {
-    await Order.findByIdAndUpdate(req.params.id, {
-      status: req.body.status,
-    });
-
-    const orders = await Order.find().sort({ createdAt: -1 });
-
-    res.json({
-      success: true,
-      orders,
-    });
-  } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: err.message,
-    });
-  }
-});
-
-app.listen(5000, () => {
-  console.log("Server running on port 5000");
-});
+startServer();

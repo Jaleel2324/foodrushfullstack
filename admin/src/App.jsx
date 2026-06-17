@@ -1,48 +1,60 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "./index.css";
+import { fetchOrders, updateOrderStatus } from "./services/api.js";
 
-function App() {
+export default function App() {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
 
-  const fetchOrders = async () => {
+  const loadOrders = useCallback(async (silent = false) => {
     try {
-      const res = await fetch("http://localhost:5000/orders");
-      const data = await res.json();
+      if (silent) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+
+      setError("");
+      const data = await fetchOrders();
 
       if (data.success) {
         setOrders(data.orders);
       }
     } catch (err) {
-      console.log("Error fetching orders:", err);
+      setError(err.message || "Error fetching orders.");
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
     }
-  };
+  }, []);
 
-  const updateStatus = async (id, status) => {
+  const handleUpdateStatus = async (id, status) => {
     try {
-      const res = await fetch(`http://localhost:5000/orders/${id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status }),
-      });
-
-      const data = await res.json();
+      const data = await updateOrderStatus(id, status);
 
       if (data.success) {
-        setOrders(data.orders);
+        setOrders((current) =>
+          current.map((order) => (order._id === id ? data.order : order))
+        );
       }
     } catch (err) {
-      console.log("Error updating:", err);
+      setError(err.message || "Error updating order.");
     }
   };
 
   useEffect(() => {
-    fetchOrders();
-    const interval = setInterval(fetchOrders, 3000);
+    loadOrders();
+
+    const interval = setInterval(() => {
+      loadOrders(true);
+    }, 10000);
+
     return () => clearInterval(interval);
-  }, []);
+  }, [loadOrders]);
 
   const totalOrders = orders.length;
-
   const totalRevenue = orders.reduce(
     (sum, order) => sum + Number(order.total || 0),
     0
@@ -68,8 +80,25 @@ function App() {
           <p>Live order dashboard connected to MongoDB</p>
         </div>
 
-        <button onClick={fetchOrders}>Refresh</button>
+        <button onClick={() => loadOrders(true)}>
+          {refreshing ? "Refreshing..." : "Refresh"}
+        </button>
       </header>
+
+      {error && (
+        <div
+          style={{
+            marginBottom: "1rem",
+            padding: "0.9rem 1rem",
+            borderRadius: "12px",
+            background: "#331111",
+            color: "#ffb4b4",
+            border: "1px solid #5f1d1d",
+          }}
+        >
+          {error}
+        </div>
+      )}
 
       <section className="statsGrid">
         <div className="statCard">
@@ -112,7 +141,7 @@ function App() {
                     ? `${(preparingOrders / totalOrders) * 100}%`
                     : "0%",
                 }}
-              ></div>
+              />
             </div>
           </div>
 
@@ -126,7 +155,7 @@ function App() {
                     ? `${(outForDeliveryOrders / totalOrders) * 100}%`
                     : "0%",
                 }}
-              ></div>
+              />
             </div>
           </div>
 
@@ -140,13 +169,18 @@ function App() {
                     ? `${(deliveredOrders / totalOrders) * 100}%`
                     : "0%",
                 }}
-              ></div>
+              />
             </div>
           </div>
         </div>
       </section>
 
-      {orders.length === 0 ? (
+      {loading ? (
+        <div className="emptyAdmin">
+          <h2>Loading orders...</h2>
+          <p>Checking your backend connection.</p>
+        </div>
+      ) : orders.length === 0 ? (
         <div className="emptyAdmin">
           <h2>No orders yet</h2>
           <p>Place an order from your main site.</p>
@@ -170,11 +204,21 @@ function App() {
 
               <div className="orderSection">
                 <h3>Customer</h3>
-                <p><strong>Name:</strong> {order.customer?.name}</p>
-                <p><strong>Email:</strong> {order.customer?.email}</p>
-                <p><strong>Address:</strong> {order.customer?.address}</p>
-                <p><strong>City:</strong> {order.customer?.city}</p>
-                <p><strong>Phone:</strong> {order.customer?.phone}</p>
+                <p>
+                  <strong>Name:</strong> {order.customer?.name}
+                </p>
+                <p>
+                  <strong>Email:</strong> {order.customer?.email}
+                </p>
+                <p>
+                  <strong>Address:</strong> {order.customer?.address}
+                </p>
+                <p>
+                  <strong>City:</strong> {order.customer?.city}
+                </p>
+                <p>
+                  <strong>Phone:</strong> {order.customer?.phone}
+                </p>
               </div>
 
               <div className="orderSection">
@@ -198,15 +242,19 @@ function App() {
               </div>
 
               <div className="statusControls">
-                <button onClick={() => updateStatus(order._id, "Preparing")}>
+                <button onClick={() => handleUpdateStatus(order._id, "Preparing")}>
                   Preparing
                 </button>
 
-                <button onClick={() => updateStatus(order._id, "Out for Delivery")}>
+                <button
+                  onClick={() =>
+                    handleUpdateStatus(order._id, "Out for Delivery")
+                  }
+                >
                   Out for Delivery
                 </button>
 
-                <button onClick={() => updateStatus(order._id, "Delivered")}>
+                <button onClick={() => handleUpdateStatus(order._id, "Delivered")}>
                   Delivered
                 </button>
               </div>
@@ -217,5 +265,3 @@ function App() {
     </main>
   );
 }
-
-export default App;
