@@ -2,16 +2,6 @@
 
 Food Rush is a full-stack food ordering platform built with React, Node.js, Express, and MongoDB. It was created to simulate a modern restaurant delivery experience with customer ordering flows, cart management, checkout, and admin-side product and order management.
 
-## Live Demo
-
-- **Frontend:** [<YOUR_FRONTEND_URL>](<YOUR_FRONTEND_URL>)
-- **Backend / API:** [<YOUR_BACKEND_URL>](<YOUR_BACKEND_URL>)
-- **GitHub Repo:** [https://github.com/Jaleel2324/foodrushfullstack](https://github.com/Jaleel2324/foodrushfullstack)
-
-> If the app is not deployed yet, remove this section until you have a live link.
-
----
-
 ## Overview
 
 Food Rush was built to demonstrate full-stack software engineering skills through a real-world style e-commerce workflow. The project includes a customer-facing ordering experience and an admin-facing management side, with a focus on clean frontend presentation, REST API development, and database integration.
@@ -84,16 +74,17 @@ The goal of this project is to show that I can:
 The application includes a customer ordering interface, animated product browsing experience, cart and checkout flow, and an admin-side management system.
 
 ### Homepage
-![Homepage](./public/screenshots/homepage.png)
+<img width="1885" height="905" alt="homepagefoodrush" src="https://github.com/user-attachments/assets/d8fbad31-9214-4286-acae-cc60731de600" />
 
 ### Menu / Product Listing
-![Products](./public/screenshots/products.png)
+<img width="1773" height="860" alt="menuitems" src="https://github.com/user-attachments/assets/9a1e9911-63eb-45e4-bc4c-ba07a53ed30d" />
 
 ### Cart / Checkout
-![Cart](./public/screenshots/cart.png)
+<img width="1898" height="916" alt="cart-items" src="https://github.com/user-attachments/assets/3fe11bcd-b442-4d28-9e20-9b37e56a866e" />
 
 ### Admin Dashboard
-![Admin Dashboard](./public/screenshots/admin-dashboard.png)
+<img width="1902" height="906" alt="admin" src="https://github.com/user-attachments/assets/25413cd8-403d-41c2-ae6f-caa4b518b4cc" />
+
 
 
 ---
